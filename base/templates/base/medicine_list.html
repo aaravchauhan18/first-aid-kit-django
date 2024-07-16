@@ -1,0 +1,66 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div>
+        <h1>Hello {{ request.user|title }}</h1>
+    </div>
+
+
+    {% if request.user.is_authenticated %}
+    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">Logout</button>
+    </form>
+    {% else %}
+    <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
+    {% endif %}
+</div>
+
+<div id="search-add-wrapper" class="mt-4 col-lg-6 ">
+    <form method="GET" style="display: flex;">
+        <input type='text' name='search-area' class="form-control mr-2" placeholder="Search your task" value="{{ search_input }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+<div class="container mt-4">
+    <h2 class="mb-3">Medicines List</h2>
+    <div class="mb-3">
+        <a href="{% url 'medicine-create' %}" class="btn btn-success">Add Medicine</a>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Sr.No</th>
+                <th scope="col">Medicine</th>
+                <th scope="col">Description</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Expiry Date</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicine in medicines %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ medicine.medicine_name }}</td>
+                <td><a href="{% url 'medicine' medicine.id %}">{{ medicine.description }}</a></td>
+                <td>{{ medicine.quantity }}</td>
+                <td>{{ medicine.expiry_date }}</td>
+                <td>
+                    <a href="{% url 'medicine-update' medicine.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="{% url 'medicine-delete' medicine.id %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No medicines in List</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}
