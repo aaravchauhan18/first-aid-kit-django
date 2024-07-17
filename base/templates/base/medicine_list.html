@@ -7,7 +7,6 @@
         <h1>Hello {{ request.user|title }}</h1>
     </div>
 
-
     {% if request.user.is_authenticated %}
     <form action="{% url 'logout' %}" method="post" style="display:inline;">
         {% csrf_token %}
@@ -38,6 +37,9 @@
                 <th scope="col">Description</th>
                 <th scope="col">Quantity</th>
                 <th scope="col">Expiry Date</th>
+                {% if request.user.is_staff %}
+                <th scope="col">User</th>
+                {% endif %}
                 <th scope="col">Action</th>
             </tr>
         </thead>
@@ -49,6 +51,11 @@
                 <td><a href="{% url 'medicine' medicine.id %}">{{ medicine.description }}</a></td>
                 <td>{{ medicine.quantity }}</td>
                 <td>{{ medicine.expiry_date }}</td>
+                {% if request.user.is_staff %}
+                <td>
+                    <a href="{% url 'user-medicines' medicine.user.id %}">{{ medicine.user.username }}</a>
+                </td>  <!-- Assuming user is a ForeignKey in Medicine -->
+                {% endif %}
                 <td>
                     <a href="{% url 'medicine-update' medicine.id %}" class="btn btn-sm btn-primary">Edit</a>
                     <a href="{% url 'medicine-delete' medicine.id %}" class="btn btn-sm btn-danger">Delete</a>
