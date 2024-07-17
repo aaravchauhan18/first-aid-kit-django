@@ -62,9 +62,15 @@
                 </td>
             </tr>
             {% empty %}
+            {% if request.user.is_staff %}
+                <tr>
+                    <td colspan="7" class="text-center">No medicines in List</td>
+                </tr>
+            {% else %}
             <tr>
                 <td colspan="6" class="text-center">No medicines in List</td>
             </tr>
+            {% endif %}
             {% endfor %}
         </tbody>
     </table>
