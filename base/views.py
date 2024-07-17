@@ -15,15 +15,12 @@ from django.contrib.auth.models import User
 
 from .models import Medicine
 from .forms import MedicineForm
+
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib import messages
 # Create your views here.
-
-# class CustomLoginView(LoginView):
-#     template_name = 'base/login.html'
-#     fields = '__all__'
-#     redirect_authenticated_user = True
-
-#     def get_success_url(self):
-#         return reverse_lazy('medicines')
 
 class CustomLoginView(LoginView):
     template_name = 'base/login.html'
@@ -56,23 +53,6 @@ class RegisterPage(FormView):
             return redirect('medicines')
         return super(RegisterPage, self).get(*args, **kwargs)
 
-# class MedicineList(LoginRequiredMixin, ListView):
-#     model = Medicine
-#     context_object_name = 'medicines'
-    
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['medicines'] = context['medicines'].filter(user=self.request.user)
-
-#         search_input = self.request.GET.get('search-area') or ''
-#         if search_input:
-#             context['medicines'] = context['medicines'].filter(
-#                 medicine_name__icontains=search_input)
-
-#         context['search_input'] = search_input
-
-#         return context
-
 class MedicineList(LoginRequiredMixin, ListView):
     model = Medicine
     context_object_name = 'medicines'
@@ -100,16 +80,6 @@ class MedicineDetail(LoginRequiredMixin, DetailView):
     model = Medicine
     context_object_name = 'medicine'
 
-# class MedicineCreate(LoginRequiredMixin, CreateView):
-#     model = Medicine
-#     form_class = MedicineForm
-#     # fields = ['medicine_name', 'description', 'quantity', 'expiry_date']
-#     success_url = reverse_lazy('medicines')
-
-#     def form_valid(self, form):
-#         form.instance.user = self.request.user
-#         return super(MedicineCreate, self).form_valid(form)
-
 class MedicineCreate(LoginRequiredMixin, CreateView):
     model = Medicine
     form_class = MedicineForm
@@ -127,12 +97,6 @@ class MedicineCreate(LoginRequiredMixin, CreateView):
             form.fields.pop('user', None)
         return form
 
-# class MedicineUpdate(LoginRequiredMixin, UpdateView):
-#     model = Medicine
-#     form_class = MedicineForm
-#     # fields = ['medicine_name', 'description', 'quantity', 'expiry_date']
-#     success_url = reverse_lazy('medicines')
-
 class MedicineUpdate(LoginRequiredMixin, UpdateView):
     model = Medicine
     form_class = MedicineForm
@@ -144,14 +108,6 @@ class MedicineUpdate(LoginRequiredMixin, UpdateView):
             # Remove the 'user' field for non-admin users
             form.fields.pop('user', None)
         return form
-
-# class MedicineDelete(LoginRequiredMixin, DeleteView):
-#     model = Medicine
-#     context_object_name = 'medicine'
-#     success_url = reverse_lazy('medicines')
-#     def get_queryset(self):
-#         owner = self.request.user
-#         return self.model.objects.filter(user=owner)
 
 class MedicineDelete(LoginRequiredMixin, DeleteView):
     model = Medicine
@@ -189,3 +145,62 @@ class UserMedicineList(LoginRequiredMixin, ListView):
         context['search_input'] = search_input
 
         return context
+
+
+
+def contact_view(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+        message = request.POST['message']
+        
+        # Format the email content for admin with improved HTML
+        email_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.5;">
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Message:</strong></p>
+                <p style="background-color: #f0f8ff; padding: 5px; margin: 0;">{message}</p>
+            </body>
+        </html>
+        """
+        
+        # Send email to admin
+        send_mail(
+            f'Contact Us Form Submission from {name}',
+            email_content,
+            settings.DEFAULT_FROM_EMAIL,
+            ['firstaidkitmgmt@gmail.com'],
+            fail_silently=False,
+            html_message=email_content
+        )
+
+        # Format the email content for user confirmation with improved HTML
+        confirmation_email_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.5;">
+                <p>Hi {name},</p>
+                <p>Thank you for contacting us! Your message has been received, and we will get back to you shortly.</p>
+                <p><strong>Here is a copy of your message:</strong></p>
+                <p style="background-color: #f0f8ff; padding: 5px; margin: 0;">{message}</p>
+                <p>Best regards,</p>
+                <p>Admin Team</p>
+            </body>
+        </html>
+        """
+
+        # Send confirmation email to the user
+        send_mail(
+            'Confirmation of Your Contact Form Submission',
+            confirmation_email_content,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+            html_message=confirmation_email_content
+        )
+        
+        messages.success(request, 'Your message has been sent successfully!')
+        return redirect('login')  # Redirect to the login page
+
+    return render(request, 'contact.html')
