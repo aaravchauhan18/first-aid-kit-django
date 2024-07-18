@@ -20,6 +20,9 @@ from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
+
+from django.utils import timezone
+from datetime import timedelta
 # Create your views here.
 
 class CustomLoginView(LoginView):
@@ -53,6 +56,8 @@ class RegisterPage(FormView):
             return redirect('medicines')
         return super(RegisterPage, self).get(*args, **kwargs)
 
+
+
 class MedicineList(LoginRequiredMixin, ListView):
     model = Medicine
     context_object_name = 'medicines'
@@ -66,14 +71,22 @@ class MedicineList(LoginRequiredMixin, ListView):
         else:
             context['medicines'] = context['medicines'].filter(user=self.request.user)  # Regular user sees their medicines
 
+        # Search functionality
         search_input = self.request.GET.get('search-area') or ''
         if search_input:
             context['medicines'] = context['medicines'].filter(
                 medicine_name__icontains=search_input)
 
         context['search_input'] = search_input
+        
+        # Check for expiring medicines
+        one_month_from_now = timezone.now() + timedelta(days=30)
+        expiring_medicines = context['medicines'].filter(expiry_date__lt=one_month_from_now)
+
+        context['expiring_medicines'] = expiring_medicines
 
         return context
+
 
 
 class MedicineDetail(LoginRequiredMixin, DetailView):
@@ -144,9 +157,18 @@ class UserMedicineList(LoginRequiredMixin, ListView):
         context['medicines'] = medicines
         context['search_input'] = search_input
 
+        # Check for expiring medicines
+        one_month_from_now = timezone.now() + timedelta(days=30)
+        expiring_medicines = context['medicines'].filter(expiry_date__lt=one_month_from_now)
+
+        context['expiring_medicines'] = expiring_medicines
+
         return context
 
-
+class UserListView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'user_list.html'  # Replace with your template name
+    context_object_name = 'users'
 
 def contact_view(request):
     if request.method == 'POST':

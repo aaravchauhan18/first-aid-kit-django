@@ -17,18 +17,33 @@
     {% endif %}
 </div>
 
+{% if expiring_medicines and not request.user.is_staff %}
+<div class="alert alert-warning mt-4">
+    <strong>Alert!</strong> The following medicines will expire within the next month:
+    <ul>
+        {% for medicine in expiring_medicines %}
+        <li>{{ medicine.medicine_name }} (Expiry Date: {{ medicine.expiry_date }})</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <div id="search-add-wrapper" class="mt-4 col-lg-6 ">
     <form method="GET" style="display: flex;">
-        <input type='text' name='search-area' class="form-control mr-2" placeholder="Search your task" value="{{ search_input }}">
+        <input type='text' name='search-area' class="form-control mr-2" placeholder="Search your medicine" value="{{ search_input }}">
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
 </div>
 
 <div class="container mt-4">
     <h2 class="mb-3">Medicines List</h2>
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-between align-items-center">
         <a href="{% url 'medicine-create' %}" class="btn btn-success">Add Medicine</a>
+        {% if request.user.is_staff %}
+            <a href="{% url 'user-list' %}" class="btn btn-info">View All Users</a>
+        {% endif %}
     </div>
+    
     <table class="table table-striped">
         <thead>
             <tr>
@@ -50,11 +65,11 @@
                 <td>{{ medicine.medicine_name }}</td>
                 <td><a href="{% url 'medicine' medicine.id %}">{{ medicine.description }}</a></td>
                 <td>{{ medicine.quantity }}</td>
-                <td>{{ medicine.expiry_date }}</td>
+                <td class="{% if medicine in expiring_medicines %}text-danger{% endif %}">{{ medicine.expiry_date }}</td>
                 {% if request.user.is_staff %}
                 <td>
                     <a href="{% url 'user-medicines' medicine.user.id %}">{{ medicine.user.username }}</a>
-                </td>  <!-- Assuming user is a ForeignKey in Medicine -->
+                </td>  
                 {% endif %}
                 <td>
                     <a href="{% url 'medicine-update' medicine.id %}" class="btn btn-sm btn-primary">Edit</a>

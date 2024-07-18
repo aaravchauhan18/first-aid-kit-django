@@ -7,9 +7,20 @@
         <a href="{% url 'medicines' %}" class="btn btn-secondary">Back to Medicines List</a>
     </div>
 
+    {% if expiring_medicines %}
+    <div class="alert alert-warning mt-4">
+        <strong>Alert!</strong> The following medicines will expire within the next month:
+        <ul>
+            {% for medicine in expiring_medicines %}
+            <li>{{ medicine.medicine_name }} (Expiry Date: {{ medicine.expiry_date }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <div id="search-add-wrapper" class="mt-4 col-lg-6 ">
         <form method="GET" style="display: flex;">
-            <input type='text' name='search-area' class="form-control mr-2" placeholder="Search your task" value="{{ search_input }}">
+            <input type='text' name='search-area' class="form-control mr-2" placeholder="Search your medicine" value="{{ search_input }}">
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
     </div>
@@ -33,7 +44,7 @@
                 <td>{{ medicine.medicine_name }}</td>
                 <td><a href="{% url 'medicine' medicine.id %}">{{ medicine.description }}</a></td>
                 <td>{{ medicine.quantity }}</td>
-                <td>{{ medicine.expiry_date }}</td>
+                <td class="{% if medicine in expiring_medicines %}text-danger{% endif %}">{{ medicine.expiry_date }}</td>
                 <td>
                     <a href="{% url 'medicine-update' medicine.id %}" class="btn btn-sm btn-primary">Edit</a>
                     <a href="{% url 'medicine-delete' medicine.id %}" class="btn btn-sm btn-danger">Delete</a>
