@@ -4,7 +4,11 @@
 
 <div class="container mt-4">
     <div>
-        <h1>Hello {{ request.user|title }}</h1>
+        {% if request.user.is_staff %}
+            <h1>Hello <a href="/admin" >{{ request.user|title }}</a></h1>
+        {% else %}
+            <h1>Hello {{ request.user|title }}</h1>
+        {% endif %}
     </div>
 
     {% if request.user.is_authenticated %}
