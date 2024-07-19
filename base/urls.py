@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import MedicineList, MedicineDetail, MedicineCreate, MedicineUpdate, MedicineDelete, CustomLoginView, RegisterPage, UserMedicineList, contact_view,UserListView
+from .views import MedicineList, MedicineDetail, MedicineCreate, MedicineUpdate, MedicineDelete, CustomLoginView, RegisterPage, UserMedicineList, contact_view,UserListView, test_404_view
 from django.contrib.auth.views import LogoutView
 from django.conf.urls import handler404
 
@@ -17,6 +17,7 @@ urlpatterns = [
     path('contact/', contact_view, name='contact'),
     path('user/<int:user_id>/medicines/', UserMedicineList.as_view(), name='user-medicines'),  # User medicines path
     path('user-list/', UserListView.as_view(), name='user-list'),
+    path('test-404/', test_404_view, name='test-404'),  # Add this line
 ]
 
 handler404 = 'base.views.custom_404'

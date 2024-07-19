@@ -258,3 +258,7 @@ def contact_view(request):
 
 def custom_404(request, exception):
     return render(request, '404.html', status=404)
+
+
+def test_404_view(request):
+    raise Http404("This is a test 404 error.")
