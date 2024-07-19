@@ -11,8 +11,8 @@
         <thead>
             <tr>
                 <th scope="col">Username</th>
-                <th scope="col">Email</th>
-                <th scope="col">Medicines Count</th>
+                <!-- <th scope="col">Email</th> -->
+                <th scope="col" class="text-center">Medicines Count</th>
                 <!-- <th scope="col">Medicines</th> -->
                 <!-- Add more fields as needed -->
             </tr>
@@ -21,8 +21,8 @@
             {% for user in users %}
             <tr>
                 <td><a href="{% url 'user-medicines' user.id %}">{{ user.username }}</a></td>
-                <td>{{ user.email }}</td>
-                <td>
+                <!-- <td>{{ user.email }}</td> -->
+                <td class="text-center">
                     {{ user.medicine_set.count }}
                 </td>
                 <!-- <td>

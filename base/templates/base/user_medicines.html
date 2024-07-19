@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Medicines for {{ user.username }}</h2>  <!-- This shows the username -->
+    <h2>Medicines for {{ user.username }}</h2> <!-- This shows the username -->
     <div class="mb-3">
         <a href="{% url 'medicines' %}" class="btn btn-secondary">Back to Medicines List</a>
     </div>
@@ -18,44 +18,46 @@
     </div>
     {% endif %}
 
-    <div id="search-add-wrapper" class="mt-4 col-lg-6 ">
-        <form method="GET" style="display: flex;">
-            <input type='text' name='search-area' class="form-control mr-2" placeholder="Search your medicine" value="{{ search_input }}">
+    <div id="search-add-wrapper" class="mt-4 col-12 col-lg-6 mx-auto">
+        <form method="GET" class="d-flex">
+            <input type="text" name="search-area" class="form-control mr-2 flex-grow-1" placeholder="Search your medicine" value="{{ search_input }}">
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
     </div>
     <br>
     
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Sr.No</th>
-                <th scope="col">Medicine</th>
-                <th scope="col">Description</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Expiry Date</th>
-                <th scope="col">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for medicine in medicines %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ medicine.medicine_name }}</td>
-                <td><a href="{% url 'medicine' medicine.id %}">{{ medicine.description }}</a></td>
-                <td>{{ medicine.quantity }}</td>
-                <td class="{% if medicine in expiring_medicines %}text-danger{% endif %}">{{ medicine.expiry_date }}</td>
-                <td>
-                    <a href="{% url 'medicine-update' medicine.id %}" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="{% url 'medicine-delete' medicine.id %}" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No medicines found for this user.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Sr.No</th>
+                    <th scope="col">Medicine</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Expiry Date</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medicine in medicines %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ medicine.medicine_name }}</td>
+                    <td><a href="{% url 'medicine' medicine.id %}">{{ medicine.description }}</a></td>
+                    <td>{{ medicine.quantity }}</td>
+                    <td class="{% if medicine in expiring_medicines %}text-danger{% endif %}">{{ medicine.expiry_date }}</td>
+                    <td class="d-flex">
+                        <a href="{% url 'medicine-update' medicine.id %}" class="btn btn-sm btn-primary mr-1">Edit</a>
+                        <a href="{% url 'medicine-delete' medicine.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No medicines found for this user.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock content %}

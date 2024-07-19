@@ -23,6 +23,8 @@ from django.contrib import messages
 
 from django.utils import timezone
 from datetime import timedelta
+
+from django.core.paginator import Paginator
 # Create your views here.
 
 class CustomLoginView(LoginView):
@@ -61,7 +63,7 @@ class RegisterPage(FormView):
 class MedicineList(LoginRequiredMixin, ListView):
     model = Medicine
     context_object_name = 'medicines'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -78,12 +80,21 @@ class MedicineList(LoginRequiredMixin, ListView):
                 medicine_name__icontains=search_input)
 
         context['search_input'] = search_input
-        
+
         # Check for expiring medicines
         one_month_from_now = timezone.now() + timedelta(days=30)
         expiring_medicines = context['medicines'].filter(expiry_date__lt=one_month_from_now)
 
         context['expiring_medicines'] = expiring_medicines
+
+        # Handle pagination
+        per_page = int(self.request.GET.get('per_page', 10))  # Get the number of items per page from the GET parameters, default to 10
+        paginator = Paginator(context['medicines'], per_page)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['page_obj'] = page_obj
+        context['per_page'] = per_page
 
         return context
 
@@ -99,8 +110,9 @@ class MedicineCreate(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('medicines')
 
     def form_valid(self, form):
-        # Set the user to the currently logged-in user
-        form.instance.user = self.request.user
+        if not self.request.user.is_staff:
+            # Set the user to the currently logged-in user if not admin
+            form.instance.user = self.request.user
         return super().form_valid(form)
 
     def get_form(self, form_class=None):
@@ -109,6 +121,7 @@ class MedicineCreate(LoginRequiredMixin, CreateView):
             # Remove the 'user' field for non-admin users
             form.fields.pop('user', None)
         return form
+
 
 class MedicineUpdate(LoginRequiredMixin, UpdateView):
     model = Medicine
@@ -162,6 +175,15 @@ class UserMedicineList(LoginRequiredMixin, ListView):
         expiring_medicines = context['medicines'].filter(expiry_date__lt=one_month_from_now)
 
         context['expiring_medicines'] = expiring_medicines
+
+         # Handle pagination
+        per_page = int(self.request.GET.get('per_page', 10))  # Get the number of items per page from the GET parameters, default to 10
+        paginator = Paginator(context['medicines'], per_page)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['page_obj'] = page_obj
+        context['per_page'] = per_page
 
         return context
 
