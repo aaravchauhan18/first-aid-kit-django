@@ -25,6 +25,10 @@ from django.utils import timezone
 from datetime import timedelta
 
 from django.core.paginator import Paginator
+
+from django.utils.decorators import method_decorator
+from django.contrib.admin.views.decorators import staff_member_required
+from .mixins import AdminRequiredMixin
 # Create your views here.
 
 class CustomLoginView(LoginView):
@@ -147,7 +151,7 @@ class MedicineDelete(LoginRequiredMixin, DeleteView):
         return self.model.objects.filter(user=self.request.user)
 
 
-class UserMedicineList(LoginRequiredMixin, ListView):
+class UserMedicineList(LoginRequiredMixin,AdminRequiredMixin, ListView):
     model = Medicine
     context_object_name = 'medicines'
     template_name = 'base/user_medicines.html'
@@ -187,10 +191,12 @@ class UserMedicineList(LoginRequiredMixin, ListView):
 
         return context
 
-class UserListView(LoginRequiredMixin, ListView):
+class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = User
     template_name = 'user_list.html'  # Replace with your template name
     context_object_name = 'users'
+    
+    
 
 def contact_view(request):
     if request.method == 'POST':
@@ -248,3 +254,7 @@ def contact_view(request):
         return redirect('login')  # Redirect to the login page
 
     return render(request, 'contact.html')
+
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
